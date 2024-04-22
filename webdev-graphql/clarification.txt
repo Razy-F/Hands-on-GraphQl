@@ -1,1 +1,20 @@
 graphQl is a specification built around HTTP for how we get and receive resources from the server normally we use REST when intreact with a server and restful endpoints and the HTTP POST GET DELETE PATCH , but graphQl gets rid of the whole idea of rest and all those different endpoints and gives us one single endpoint ( /graphql) and the way we determine what data we get back from that endpoint is based on the query that we send to that endpoint 
+
+the way that graphQl knows which data to access based on the query that we send it is we have to define a schema of how all of our data intreacts together and that schema is what we need to pass into our express graphQl function so that our express graphQl knows what our actual graphQl data looks like
+
+# ---------------------------------------------------------------------------- #
+const schema = new GraphQLSchema({
+  query: new GraphQLObjectType({
+    name: "HelloWorld",
+    fields: () => ({
+      /* now graphQl knows that our Hello World object has a message filed and that message filed is going to return a string */
+      message: {
+        type: GraphQLString,
+        /* lastely we needed to tell graphQl where to get this message from so in our case we just want to give it a static message of 'hello world' and this going to use the resolve section of this object which is just going to be a function that tells graphQl where to get the information from */
+        resolve: () => "Hello World",
+      },
+    }),
+  }),
+});
+
+the first thing that we see is that we have our schema which defines our query section and this query section defines all the different use cases that we can use for querying ( in our case this will be authors and books ) next inside of each of our different objects we have what are called fileds which are all the different sections that object that we can actually query to return data from ( name, label , title , describtion , author .....) and then we have a resolve function which is going to be what actual information are we returning for this filed how do we actually get the information for this field and return it as resolved function also comes with a few arguments such as the parent and different arguments that we pass to our query 
