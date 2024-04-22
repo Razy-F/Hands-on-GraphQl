@@ -5,9 +5,8 @@ import {
   GraphQLObjectType,
   GraphQLString,
   GraphQLList,
-  GraphQLID,
-  GraphQLNonNull,
   GraphQLInt,
+  GraphQLNonNull,
 } from "graphql";
 import { authors, books } from "./src/constants/index.js";
 const app = express();
@@ -30,7 +29,7 @@ const BookType = new GraphQLObjectType({
   description: "This represent a book written by an author",
   fields: () => ({
     //we dont need to supply a resolve for our ID since we have an object that already has an ID property it will pull that ID property directly from that object
-    id: { type: GraphQLNonNull(GraphQLID) },
+    id: { type: GraphQLNonNull(GraphQLInt) },
     name: { type: GraphQLNonNull(GraphQLString) },
     authorId: { type: GraphQLNonNull(GraphQLInt) },
     /* since our actual array of data doesnt have an author field we need to specify a custom resolve for how we get this author  */
@@ -48,7 +47,7 @@ const AuthorType = new GraphQLObjectType({
   name: "Author",
   description: "This represent an author of a book ",
   fields: () => ({
-    id: { type: GraphQLNonNull(GraphQLID) },
+    id: { type: GraphQLNonNull(GraphQLInt) },
     name: { type: GraphQLNonNull(GraphQLString) },
     books: {
       type: GraphQLList(BookType),
@@ -62,6 +61,14 @@ const RootQueryType = new GraphQLObjectType({
   name: "Query",
   description: "Root Query",
   fields: () => ({
+    book: {
+      type: BookType,
+      description: "Single book",
+      args: {
+        id: { type: GraphQLInt },
+      },
+      resolve: (parent, args) => books.find((book) => book.id === args.id),
+    },
     books: {
       type: new GraphQLList(BookType),
       description: "List of books",
@@ -72,6 +79,54 @@ const RootQueryType = new GraphQLObjectType({
       description: "List of Authors",
       resolve: () => authors,
     },
+    author: {
+      type: AuthorType,
+      description: "Single author",
+      args: {
+        id: { type: GraphQLNonNull(GraphQLInt) },
+      },
+      resolve: (parent, args) =>
+        authors.find((author) => author.id === args.id),
+    },
+  }),
+});
+
+const RootMutationType = new GraphQLObjectType({
+  name: "Mutations",
+  description: "Root Mutation",
+  fields: () => ({
+    addBook: {
+      type: BookType,
+      description: "Add a book",
+      args: {
+        name: { type: GraphQLNonNull(GraphQLString) },
+        authorId: { type: GraphQLNonNull(GraphQLString) },
+      },
+      resolve: (parent, args) => {
+        const book = {
+          id: books.length + 1,
+          name: args.name,
+          authorId: args.authorId,
+        };
+        books.push(book);
+        return book;
+      },
+    },
+    addAuthor: {
+      type: AuthorType,
+      description: "Add an author",
+      args: {
+        name: { type: GraphQLNonNull(GraphQLString) },
+      },
+      resolve: (parent, args) => {
+        const author = {
+          id: authors.length + 1,
+          name: args.name,
+        };
+        authors.push(author);
+        return author;
+      },
+    },
   }),
 });
 
@@ -79,6 +134,8 @@ const RootQueryType = new GraphQLObjectType({
 
 const schema = new GraphQLSchema({
   query: RootQueryType,
+  /* we want to create a new object type which is going to be just like our route query type but this is going to be our route mutation type becouse our schema actually takes a mutation , so we are gonna pass it our route mutation type  */
+  mutation: RootMutationType,
 });
 
 app.use(

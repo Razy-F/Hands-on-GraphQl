@@ -18,3 +18,9 @@ const schema = new GraphQLSchema({
 });
 
 the first thing that we see is that we have our schema which defines our query section and this query section defines all the different use cases that we can use for querying ( in our case this will be authors and books ) next inside of each of our different objects we have what are called fileds which are all the different sections that object that we can actually query to return data from ( name, label , title , describtion , author .....) and then we have a resolve function which is going to be what actual information are we returning for this filed how do we actually get the information for this field and return it as resolved function also comes with a few arguments such as the parent and different arguments that we pass to our query 
+
+
+
+# ---------------------------------------------------------------------------- #
+modifying our data which is what we use mutations
+mutations are graphQl version of using POST PUT and DELETE on a rest api server .
